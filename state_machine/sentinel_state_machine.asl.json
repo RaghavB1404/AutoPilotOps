@@ -1,0 +1,31 @@
+{
+  "Comment": "Sentinel workflow orchestrating all agents",
+  "StartAt": "Diagnoser",
+  "States": {
+    "Diagnoser": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:REGION:ACCOUNT_ID:function:DiagnoserFunction",
+      "Next": "Planner"
+    },
+    "Planner": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:REGION:ACCOUNT_ID:function:PlannerFunction",
+      "Next": "Executor"
+    },
+    "Executor": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:REGION:ACCOUNT_ID:function:ExecutorFunction",
+      "Next": "Tester"
+    },
+    "Tester": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:REGION:ACCOUNT_ID:function:TesterFunction",
+      "Next": "Reflector"
+    },
+    "Reflector": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:REGION:ACCOUNT_ID:function:ReflectorFunction",
+      "End": true
+    }
+  }
+}
