@@ -1,0 +1,1 @@
+Please analyze the following metrics JSON and identify the most likely root cause of the alarm. Provide a JSON response with `cause`, `confidence`, and `next_steps`.

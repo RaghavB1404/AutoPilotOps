@@ -1,0 +1,98 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: AutoPilotOps Sentinel stack.
+
+Resources:
+  DiagnoserFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: agents/diagnoser.handler
+      Runtime: python3.9
+      CodeUri: .
+
+  PlannerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: agents/planner.handler
+      Runtime: python3.9
+      CodeUri: .
+
+  ExecutorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: agents/executor.handler
+      Runtime: python3.9
+      CodeUri: .
+
+  TesterFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: agents/tester.handler
+      Runtime: python3.9
+      CodeUri: .
+
+  ReflectorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: agents/reflector.handler
+      Runtime: python3.9
+      CodeUri: .
+
+  SentinelFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: agents/sentinel.handler
+      Runtime: python3.9
+      CodeUri: .
+      Policies:
+        - Statement:
+            Effect: Allow
+            Action: states:StartExecution
+            Resource: !Ref SentinelStateMachine
+
+  SentinelStateMachine:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      DefinitionUri: state_machine/sentinel_state_machine.asl.json
+      DefinitionSubstitutions:
+        REGION: !Ref "AWS::Region"
+        ACCOUNT_ID: !Ref "AWS::AccountId"
+      Policies:
+        - LambdaInvokePolicy:
+            FunctionName: "*"
+
+  HighCPUAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: High CPU utilization alarm
+      MetricName: CPUUtilization
+      Namespace: AWS/EC2
+      Statistic: Average
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 80
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: InstanceId
+          Value: i-1234567890abcdef0
+
+  AlarmRule:
+    Type: AWS::Events::Rule
+    Properties:
+      EventPattern:
+        source:
+          - aws.cloudwatch
+        detail-type:
+          - CloudWatch Alarm State Change
+        detail:
+          alarmName:
+            - !Ref HighCPUAlarm
+      Targets:
+        - Id: InvokeSentinel
+          Arn: !GetAtt SentinelFunction.Arn
+
+
+Outputs:
+  StateMachineArn:
+    Description: Sentinel state machine ARN
+    Value: !Ref SentinelStateMachine
