@@ -38,6 +38,21 @@ Resources:
       Runtime: python3.9
       CodeUri: .
 
+
+  SentinelFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: agents/sentinel.handler
+      Runtime: python3.9
+      CodeUri: .
+      Policies:
+        - Statement:
+            Effect: Allow
+            Action: states:StartExecution
+            Resource: !Ref SentinelStateMachine
+
+=======
+
   SentinelStateMachine:
     Type: AWS::Serverless::StateMachine
     Properties:
@@ -76,6 +91,10 @@ Resources:
           alarmName:
             - !Ref HighCPUAlarm
       Targets:
+
+        - Id: InvokeSentinel
+          Arn: !GetAtt SentinelFunction.Arn
+
         - Id: StartSentinel
           Arn: !Ref SentinelStateMachine
           RoleArn: !GetAtt AlarmInvokeRole.Arn
