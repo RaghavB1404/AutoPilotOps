@@ -12,5 +12,13 @@ def handler(event: Dict[str, Any], context: Any = None) -> Dict[str, Any]:
     # Stub check: if we executed anything, consider it successful
     success = bool(results)
     result = {"test_passed": success, "instance_id": event.get("instance_id")}
+
+
+
+def handler(event: dict, context=None) -> dict:
+    """Verify that the remediation actions had the desired effect."""
+    results = event.get("results", [])
+    success = all(item.get("status") == "success" for item in results)
+    result = {"test_passed": success}
     print(json.dumps(result))
     return result

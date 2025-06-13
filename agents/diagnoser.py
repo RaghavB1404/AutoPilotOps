@@ -34,5 +34,14 @@ def handler(event: Dict[str, Any], context: Any = None) -> Dict[str, Any]:
     llm_input = f"{prompt}\n{json.dumps(metrics)}"
     diagnosis = _call_llm(llm_input)
     diagnosis["instance_id"] = instance_id
+
+
+def handler(event: dict, context=None) -> dict:
+    """Diagnose the cause of the alarm.
+
+    This placeholder implementation simply returns a fixed diagnosis.
+    """
+    diagnosis = {"reason": "High CPU utilization detected"}
+
     print(json.dumps(diagnosis))
     return diagnosis

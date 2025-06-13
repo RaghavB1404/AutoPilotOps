@@ -21,5 +21,14 @@ def handler(event: Dict[str, Any], context: Any = None) -> Dict[str, Any]:
     steps = event.get("next_steps", "")
     plan = _parse_steps(steps)
     result = {"plan": plan, "instance_id": event.get("instance_id")}
+
+
+def handler(event: dict, context=None) -> dict:
+    """Generate a remediation plan based on the diagnosis."""
+    diagnosis = event.get("reason", "")
+    plan = []
+    if "High CPU" in diagnosis:
+        plan.append({"action": "RestartInstance"})
+    result = {"plan": plan}
     print(json.dumps(result))
     return result

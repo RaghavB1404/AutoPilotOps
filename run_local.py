@@ -1,4 +1,7 @@
+
 from agents.sentinel import handler as sentinel
+=======
+
 from agents.diagnoser import handler as diagnoser
 from agents.planner import handler as planner
 from agents.executor import handler as executor
@@ -24,6 +27,7 @@ event = {
 }
 
 state = sentinel(event)
+state = {}
 state.update(diagnoser(state))
 state.update(planner(state))
 state.update(executor(state))

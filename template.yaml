@@ -38,6 +38,7 @@ Resources:
       Runtime: python3.9
       CodeUri: .
 
+
   SentinelFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -49,6 +50,8 @@ Resources:
             Effect: Allow
             Action: states:StartExecution
             Resource: !Ref SentinelStateMachine
+
+=======
 
   SentinelStateMachine:
     Type: AWS::Serverless::StateMachine
@@ -88,9 +91,32 @@ Resources:
           alarmName:
             - !Ref HighCPUAlarm
       Targets:
+
         - Id: InvokeSentinel
           Arn: !GetAtt SentinelFunction.Arn
 
+        - Id: StartSentinel
+          Arn: !Ref SentinelStateMachine
+          RoleArn: !GetAtt AlarmInvokeRole.Arn
+
+  AlarmInvokeRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: events.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: StartStateMachine
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: states:StartExecution
+                Resource: !Ref SentinelStateMachine
 
 Outputs:
   StateMachineArn:
